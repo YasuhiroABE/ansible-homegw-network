@@ -30,10 +30,10 @@ Role Variables
 
 ### Default
 
-    # DNS server list in /etc/resolv.conf (example: [192.168.0.1])
+    # DNS server list in /etc/resolv.conf (example: [8.8.8.8])
     homegw_network_setup_nameservers: []
     
-    # Domain list in /etc/resolv.conf (example: [8.8.8.8]
+    # Domain list in /etc/resolv.conf (example: [example.org.]
     homegw_network_resolv_search: []
     
     # Internal ip address (example: 192.168.0.1/24)
@@ -51,8 +51,7 @@ Role Variables
     # [Optional] If you have a gateway at your external network, please set the ip address. (example: 172.16.0.1)
     homegw_network_setup_external_gateway: ''
 
-    # Labels for the ansible blockinfile module 
-    # Each line shuould be unique.
+    # Labels for the ansible blockinfile module.
     homegw_network_setup_lo_label: 'ANSIBLE LO CONFIG'
     homegw_network_setup_br0_label: 'ANSIBLE BR0 CONFIG'
     homegw_network_setup_br0_manual_label: 'ANSIBLE ETHDEV MANUAL CONFIG'
@@ -68,15 +67,16 @@ Example Playbook
 
     - hosts: servers
       vars:
-        homegw_network_setup_br0_hostprefix: 192.168.39.1/24
+        homegw_network_setup_external_device: ens33
+        homegw_network_setup_external_hostprefix: 172.16.10.1/24
+        homegw_network_setup_br0_hostprefix: 192.168.0.1/24
         homegw_network_setup_br0_devices:
           - ens34
-          - ens38
-        homegw_network_setup_external_device: ens33
-        homegw_network_setup_external_hostprefix: 10.1.1.88/24
+          - ens35
         homegw_network_resolv_nameservers:
           - 8.8.8.8
         homegw_network_resolv_search:
+		  - subnet.example.org.
           - example.org.
       roles:
         - YasuhiroABE.homegw-network
