@@ -31,7 +31,7 @@ Role Variables
 ### Default
 
     # DNS server list in /etc/resolv.conf (example: [8.8.8.8])
-    homegw_network_setup_nameservers: []
+    homegw_network_resolv_nameservers: []
     
     # Domain list in /etc/resolv.conf (example: [example.org.]
     homegw_network_resolv_search: []
@@ -76,7 +76,7 @@ Example Playbook
         homegw_network_resolv_nameservers:
           - 8.8.8.8
         homegw_network_resolv_search:
-		  - subnet.example.org.
+          - subnet.example.org.
           - example.org.
       roles:
         - YasuhiroABE.homegw-network

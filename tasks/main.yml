@@ -51,6 +51,7 @@
         {% if homegw_network_setup_external_gateway %}
         gateway {{ homegw_network_setup_external_gateway }}
         {% endif %}
+  when: homegw_network_setup_external_device != ''
   register: result
   
 - name: add manual network entry for bridge
