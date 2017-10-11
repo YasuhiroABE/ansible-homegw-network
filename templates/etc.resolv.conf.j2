@@ -1,0 +1,5 @@
+# ansible managed file #
+{% for ns in homegw_network_resolv_nameservers %}
+nameserver {{ ns }}
+{% endfor %}
+search {{ homegw_network_resolv_search|join(' ') }}

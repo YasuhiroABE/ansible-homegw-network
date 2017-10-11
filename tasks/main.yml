@@ -1,0 +1,94 @@
+---
+- name: install server packages
+  apt: pkg={{ item }} update_cache=yes cache_valid_time=1200
+  with_items:
+    - bridge-utils
+  register: result
+
+# remove the *resolvconf* package, because we have a static global address.
+- name: remove resolvhost package
+  become: True
+  apt: pkg={{ item }} state=absent
+  with_items:
+    resolvconf
+  register: result
+  
+- name: delete all setting from interfaces
+  become: True
+  lineinfile:
+    path: /etc/network/interfaces
+    state: absent
+    regexp: "^auto *{{ item }}|^iface *{{ item }}|^allow-hotplug *{{ item }}"
+  with_items:
+    - "{{ ansible_interfaces }}"
+  register: result
+  
+- name: add lo network entry
+  become: True
+  blockinfile:
+    path: /etc/network/interfaces
+    marker: "# {mark} {{ homegw_network_setup_lo_label }}"
+    insertafter: "^# BEGIN {{ homegw_network_setup_lo_label }}"
+    block: |
+      auto lo
+      iface lo inet loopback
+      iface lo inet6 loopback
+  register: result
+
+- name: add external network entry
+  become: True
+  blockinfile:
+    path: /etc/network/interfaces
+    marker: "# {mark} {{ homegw_network_setup_external_label }}"
+    insertafter: "^# BEGIN {{ homegw_network_setup_external_label }}"
+    block: |
+      auto {{ homegw_network_setup_external_device }}
+      iface {{ homegw_network_setup_external_device }} inet static
+        address {{ homegw_network_setup_external_hostprefix|ipaddr('address') }}
+        netmask {{ homegw_network_setup_external_hostprefix|ipaddr('netmask') }}
+        network {{ homegw_network_setup_external_hostprefix|ipaddr('network') }}
+        broadcast {{ homegw_network_setup_external_hostprefix|ipaddr('broadcast') }}
+        {% if homegw_network_setup_external_gateway %}
+        gateway {{ homegw_network_setup_external_gateway }}
+        {% endif %}
+  register: result
+  
+- name: add manual network entry for bridge
+  become: True
+  blockinfile:
+    path: /etc/network/interfaces
+    marker: "# {mark} {{ item }} {{ homegw_network_setup_br0_manual_label }}"
+    insertafter: "^# BEGIN {{ item }} {{ homegw_network_setup_br0_manual_label }}"
+    block: |
+      auto {{ item }}
+      iface {{ item }} inet manual
+  with_items:
+    - "{{ homegw_network_setup_br0_devices }}"
+  register: result
+
+- name: add br0 network entry
+  become: True
+  blockinfile:
+    path: /etc/network/interfaces
+    marker: "# {mark} {{ homegw_network_setup_br0_label }}"
+    insertafter: "^# BEGIN {{ homegw_network_setup_br0_label }}"
+    block: |
+      auto br0
+      iface br0 inet static
+        address {{ homegw_network_setup_br0_hostprefix|ipaddr('address') }}
+        netmask {{ homegw_network_setup_br0_hostprefix|ipaddr('netmask') }}
+        network {{ homegw_network_setup_br0_hostprefix|ipaddr('network') }}
+        broadcast {{ homegw_network_setup_br0_hostprefix|ipaddr('broadcast') }}
+        bridge_ports {{ homegw_network_setup_br0_devices|join(' ') }}
+        bridge_stp on
+  register: result
+
+- name: replace /etc/resolv.conf
+  become: True
+  template:
+    src: etc.resolv.conf.j2
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: 0644
+  register: result
