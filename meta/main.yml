@@ -1,6 +1,6 @@
 galaxy_info:
   author: Yasuhiro ABE
-  description: Setup the pppoe package on Debian and Ubuntu.
+  description: Setup the network settings on Debian and Ubuntu.
 
   license: Apache
 
