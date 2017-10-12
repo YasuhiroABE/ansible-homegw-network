@@ -16,6 +16,6 @@ homegw_network_setup_external_hostprefix: ''
 homegw_network_setup_external_gateway: ''
 
 # DNS server list in /etc/resolv.conf
-homegw_network_setup_nameservers: []
+homegw_network_resolv_nameservers: []
 # domain list in /etc/resolv.conf
 homegw_network_resolv_search: []
